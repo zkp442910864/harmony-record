@@ -15,7 +15,7 @@ export default class DefaultAbility extends UIAbility {
     // Main window is created, set main page for this ability.
     Logger.info('Ability onWindowStageCreate');
 
-    windowStage.loadContent('pages/Index', (err) => {
+    windowStage.loadContent('views/index/Index', (err) => {
       if (err.code) {
         Logger.error('Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
         return;
