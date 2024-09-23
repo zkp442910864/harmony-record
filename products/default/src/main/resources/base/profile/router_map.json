@@ -1,0 +1,12 @@
+{
+  "routerMap": [
+    {
+      "name": "AddRecord",
+      "pageSourceFile": "src/main/ets/views/addRecord/AddRecord.ets",
+      "buildFunction": "AddRecordBuilder",
+      "data": {
+        "description" : "添加页面"
+      }
+    }
+  ]
+}
