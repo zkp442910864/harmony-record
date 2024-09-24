@@ -1,5 +1,6 @@
 import { CommonConstants } from '../../constants/CommonConstants';
-import { IndexHome } from './modules/Home';
+import { Home } from './modules/Home';
+import { Statistics } from './modules/Statistics';
 
 @Entry
 @Component
@@ -11,17 +12,17 @@ struct Index {
     Navigation(this.pageStack) {
       Tabs({index: 0}) {
         TabContent() {
-          IndexHome()
+          Home()
         }
         .tabBar(this.tabBar(0, '首页', $r('app.media.home')))
 
         TabContent() {
-          IndexHome()
+          Statistics()
         }
         .tabBar(this.tabBar(1, '统计', $r('app.media.chart')))
 
         TabContent() {
-          IndexHome()
+          Home()
         }
         .tabBar(this.tabBar(2, '个人', $r('app.media.moneybag')))
       }

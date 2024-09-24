@@ -1,7 +1,7 @@
 import { CommonConstants } from '../../../constants/CommonConstants'
 
 @Component
-export struct IndexHome {
+export struct Home {
 
   @Consume('pageStack') pageStack?: NavPathStack;
 
