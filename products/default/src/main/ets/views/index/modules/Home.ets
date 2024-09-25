@@ -77,6 +77,7 @@ export struct Home {
     .height('100%')
     .width('100%')
     .backgroundColor(CommonConstants.COLOR_OTHER1)
+
   }
 
   /** 添加记录 */
