@@ -1,4 +1,4 @@
-import { EnumRecordType, RecordTypeModel } from './base';
+import { EnumRecordType, RecordTypeModel } from './types/base';
 
 export class RecordType {
   inTypeArr: RecordTypeModel[] = [];

@@ -1,5 +1,5 @@
 import { CommonConstants } from '../../constants/CommonConstants';
-import { ItemDataModel } from '../../viewmodel/base';
+import { ItemDataModel } from '../../viewmodel/types/base';
 
 @Preview
 // @Entry
