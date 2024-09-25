@@ -44,7 +44,7 @@ export struct RadioList {
 @Extend(Radio)
 function commonRadioStyle() {
   .radioStyle({
-    checkedBackgroundColor: CommonConstants.COLOR_SECONDARY,
+    checkedBackgroundColor: CommonConstants.COLOR_MAIN,
   })
 }
 
