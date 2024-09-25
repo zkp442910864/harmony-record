@@ -103,7 +103,7 @@ export struct CheckboxList {
 @Extend(Checkbox)
 function commonCheckboxStyle() {
   .shape(CheckBoxShape.ROUNDED_SQUARE)
-  .selectedColor(CommonConstants.COLOR_SECONDARY)
+  .selectedColor(CommonConstants.COLOR_MAIN)
 }
 
 

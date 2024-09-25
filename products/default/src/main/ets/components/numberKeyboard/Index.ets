@@ -69,12 +69,11 @@ export struct NumberKeyboard {
 
         Column({space: 16}) {
           Button() {
-            Image($r('app.media.blank'))
-              .fillColor(CommonConstants.COLOR_TEXT_MAIN)
-              .size({
-                // width: 50,
-                height: 40
-              })
+            Text() {
+              SymbolSpan($r('sys.symbol.delete_left'))
+                .fontColor([CommonConstants.COLOR_TEXT_MAIN])
+                .fontSize(40)
+            }
           }
             .customButtonStyle()
             .flexGrow(1)
