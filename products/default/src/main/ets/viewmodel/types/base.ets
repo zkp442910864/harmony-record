@@ -43,5 +43,5 @@ export interface WalletModel {
 export enum EnumRecordType {
   IN = 1,
   OUT = 2,
-  All = 3
+  ALL = 3
 }

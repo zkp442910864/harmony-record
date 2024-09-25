@@ -1,5 +1,5 @@
 import { CommonConstants } from '../../constants/CommonConstants'
-import { EnumRecordType, ItemDataModel, RecordTypeModel } from '../../viewmodel/base'
+import { EnumRecordType, ItemDataModel, RecordTypeModel } from '../../viewmodel/types/base'
 import { CacheData, RecordType } from '../../viewmodel/recordType'
 import { curves } from '@kit.ArkUI'
 import { NumberKeyboard } from '../../components/numberKeyboard/Index'
@@ -52,7 +52,6 @@ struct AddRecord {
     .backgroundColor(CommonConstants.COLOR_SECONDARY)
     .onReady((context) => {
       this.pathStack = context.pathStack;
-      context.getConfigInRouteMap()
     })
     .onAppear(() => {
       // this.pathStack.getParent()

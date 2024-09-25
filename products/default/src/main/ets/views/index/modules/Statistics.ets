@@ -1,11 +1,13 @@
 import { CommonConstants } from '../../../constants/CommonConstants'
 import { McBarChart, Options } from '@mcui/mccharts'
 
-@Entry
-@Preview
+// @Entry
+// @Preview
 @Component
 export struct Statistics {
+  @Consume('pageStack') pageStack?: NavPathStack;
   defOption: Options = new Options({
+    color: [CommonConstants.COLOR_TEXT_OUT, CommonConstants.COLOR_TEXT_IN],
     legend: {
       // show: false,
       top: '0%',
@@ -76,16 +78,33 @@ export struct Statistics {
       .backgroundColor(CommonConstants.COLOR_OTHER1)
 
       Column() {
-        Tabs() {
-          TabContent() {
-            this.bottomContent()
-          }
-          .tabBar('支出')
+        Stack() {
+          Tabs() {
+            TabContent() {
+              this.bottomContent()
+            }
+            .tabBar('支出')
 
-          TabContent() {
-            this.bottomContent()
+            TabContent() {
+              this.bottomContent()
+            }
+            .tabBar('收入')
           }
-          .tabBar('收入')
+          .scrollable(false)
+
+          Button() {
+            Text('+')
+              .fontColor(CommonConstants.COLOR_TEXT_MAIN)
+              .fontSize(32)
+              .fontWeight(FontWeight.Bold)
+          }
+            .type(ButtonType.Circle)
+            .backgroundColor(CommonConstants.COLOR_MAIN)
+            .width(50)
+            .height(50)
+            .shadow(CommonConstants.BOX_SHADOW)
+            .position({right: 10, bottom: 30})
+            .onClick(() => this.linkAdd())
         }
       }
       .flexGrow(1)
@@ -97,6 +116,10 @@ export struct Statistics {
     .height('100%')
     .width('100%')
     .backgroundColor(CommonConstants.COLOR_SECONDARY)
+  }
+
+  linkAdd() {
+    this.pageStack?.pushPathByName('AddRecordType', '');
   }
 
   @Builder

@@ -5,7 +5,15 @@
       "pageSourceFile": "src/main/ets/views/addRecord/Index.ets",
       "buildFunction": "builderFn",
       "data": {
-        "description" : "添加页面"
+        "description" : "添加/编辑 页面"
+      }
+    },
+    {
+      "name": "AddRecordType",
+      "pageSourceFile": "src/main/ets/views/addRecordType/Index.ets",
+      "buildFunction": "builderFn",
+      "data": {
+        "description" : "添加/编辑 类型"
       }
     }
   ]
