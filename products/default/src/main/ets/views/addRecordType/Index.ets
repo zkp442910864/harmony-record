@@ -97,7 +97,7 @@ function commonCheckboxStyle() {
 }
 
 @ObservedV2
-class RecordType implements Partial<RecordTypeModel> {
+class RecordType {
   @Trace recordName = '';
   @Trace recordType = EnumRecordType.ALL;
 

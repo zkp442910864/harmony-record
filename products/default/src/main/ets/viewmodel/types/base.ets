@@ -1,32 +1,52 @@
+import { relationalStore } from '@kit.ArkData';
 
-/** 基础数据类型 */
-export interface ItemDataModel {
+/** 记录 模型 */
+export interface RecordModel<T extends number | Date = number> {
   /** 自增id */
   id?: number;
   /** 记录类型: RecordModel.id */
-  recordTypeId: number;
+  recordTypeId?: number;
+  recordTypeName?: string;
   /** 数值类型: 1收入 2支出 */
-  valueType: EnumRecordType;
+  valueType?: EnumRecordType;
   /** 数值 */
-  value: string;
-  /** 时间 */
-  date?: Date;
+  value?: string;
+  /** 创建时间 */
+  createDate?: T;
   /** 手动时间 */
-  recordDate?: Date;
+  recordDate?: T;
   /** 备注 */
   remarks?: string;
 }
 
-/** 记录类型 */
-export interface RecordTypeModel {
+/** 记录每天标题 模型 */
+export interface RecordDayTitleModel {
+  /** 是否标题 */
+  isTitle: boolean;
+  /** 日期 */
+  date: string;
+  /** 当天收入 */
+  inTotal: string;
+  /** 当天支出 */
+  outTotal: string;
+  /** 自定义key */
+  customKey: string;
+}
+
+/** 记录类型 模型 */
+export interface RecordTypeModel<T extends number | Date = number> {
   /** 自增id */
-  id: number;
+  id?: number;
   /** 类型名称 */
-  recordName: string;
+  recordName?: string;
   /** 类型: 1收入 2支出 3两边都支持 */
-  recordType: EnumRecordType;
+  recordType?: EnumRecordType;
   /** 时间 */
-  date: Date;
+  createDate?: T;
+  /** 是否删除 0否 1是 */
+  isDelete?: number;
+  /** 排序 */
+  sort?: number;
 }
 
 /** 钱包类型 */
@@ -36,7 +56,7 @@ export interface WalletModel {
   /** 值 */
   value: string;
   /** 时间 */
-  date: Date;
+  createDate: number | Date;
 }
 
 /** 类型: IN收入 OUT支出 */
