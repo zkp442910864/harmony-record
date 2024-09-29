@@ -148,6 +148,6 @@ export struct Statistics {
     }
     .width('100%')
     .height('100%')
-    .divider({ strokeWidth: 1, startMargin: 60, endMargin: 60 })
+    .divider({ strokeWidth: 0.5, startMargin: 60, endMargin: 60, color: '#22666666' })
   }
 }

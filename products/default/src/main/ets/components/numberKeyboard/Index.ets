@@ -1,13 +1,13 @@
 import { CommonConstants } from '../../constants/CommonConstants';
-import { ItemDataModel } from '../../viewmodel/types/base';
+import { RecordModel } from '../../viewmodel/types/base';
 
 @Preview
 // @Entry
 @Component
 export struct NumberKeyboard {
   @Require commit = () => {};
-  @Consume('params') params: Partial<ItemDataModel>
-  // @State params: Partial<ItemDataModel> = {};
+  @Consume('params') params: RecordModel
+  // @State params: Partial<RecordModel> = {};
   numberArr = [
     '7', '8', '9',
     '4', '5', '6',
