@@ -10,8 +10,8 @@ export class RecordType {
   /** 获取数据数据 */
   async getRecordTypeDataDb() {
     const list = await DataSql.getInstance().queryRecordTypeList()
-    this.inTypeArr = list.filter(ii => ii.recordType === EnumRecordType.IN);
-    this.outTypeArr = list.filter(ii => ii.recordType === EnumRecordType.OUT);
+    this.inTypeArr = list.filter(ii => [EnumRecordType.IN, EnumRecordType.ALL].includes(ii.recordType!));
+    this.outTypeArr = list.filter(ii => [EnumRecordType.OUT, EnumRecordType.ALL].includes(ii.recordType!));
   }
 }
 

@@ -31,6 +31,7 @@ export interface RecordDayTitleModel {
   outTotal: string;
   /** 自定义key */
   customKey: string;
+  children?: RecordModel<Date>[];
 }
 
 /** 记录类型 模型 */
@@ -49,14 +50,29 @@ export interface RecordTypeModel<T extends number | Date = number> {
   sort?: number;
 }
 
+/** 记录类型 统计模型 */
+export interface RecordTypeStatisticsModel {
+  recordTypeId?: number;
+  /** 类型名称 */
+  recordName?: string;
+  /** 记录类型 */
+  valueType?: EnumRecordType;
+  /** 类型统计 */
+  total?: string;
+  /** 占用百分比 */
+  pre?: string;
+  /** 是否删除 0否 1是 */
+  isDelete?: number;
+}
+
 /** 钱包类型 */
-export interface WalletModel {
+export interface WalletModel<T extends number | Date = number> {
   /** 自增id */
-  id: number;
+  id?: number;
   /** 值 */
-  value: string;
+  value?: string;
   /** 时间 */
-  createDate: number | Date;
+  createDate?: T;
 }
 
 /** 类型: IN收入 OUT支出 */
@@ -64,4 +80,16 @@ export enum EnumRecordType {
   IN = 1,
   OUT = 2,
   ALL = 3
+}
+
+/** 统计每项数据 */
+export interface StatisticsItem {
+  month: string;
+  total: number;
+}
+
+/** 统计数据 */
+export interface StatisticsData {
+  inList: Array<StatisticsItem | null>;
+  outList: Array<StatisticsItem | null>;
 }

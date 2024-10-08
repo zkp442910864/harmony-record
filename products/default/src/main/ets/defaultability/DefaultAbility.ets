@@ -17,7 +17,6 @@ export default class DefaultAbility extends UIAbility {
     Logger.info('Ability onWindowStageCreate');
 
     initSqlObj(this.context);
-    AppStorage.setOrCreate('PropA', 47);
     windowStage.loadContent('views/index/Index', (err) => {
       if (err.code) {
         Logger.error('Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
@@ -33,6 +32,7 @@ export default class DefaultAbility extends UIAbility {
   }
 
   onWindowStageWillDestroy(windowStage: window.WindowStage): void {
+    Logger.info('销毁');
     getSqlObj().rdbStore.close();
   }
 

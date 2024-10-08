@@ -33,12 +33,12 @@ struct Index {
       Tabs({index: 0}) {
 
         TabContent() {
-          Home()
+          Home({pageShow: this.current === 0})
         }
         .tabBar(this.tabBar(0, '首页', $r('app.media.home')))
 
         TabContent() {
-          Statistics()
+          Statistics({pageShow: this.current === 1})
         }
         .tabBar(this.tabBar(1, '统计', $r('app.media.chart')))
 

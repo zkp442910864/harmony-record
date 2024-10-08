@@ -1,17 +1,18 @@
 import { DataSql } from '../sql/dataSql';
+import { DateUtils } from '../utils';
 import { EnumRecordType, RecordDayTitleModel, RecordModel } from './types/base';
 
 // @Observed
 export class RecordClass {
-  /** 当前年份 */
-  currentYear = 0;
-  /** 当前月份 */
   currentMonth = 0;
+  currentDate = new Date();
+  startDate = new Date();
+  endDate = new Date();
   /** 月份总收入 */
   monthInTotal = '0.00';
   /** 月份总支出 */
   monthOutTotal = '0.00';
-  listData: Array<RecordModel<Date> | RecordDayTitleModel> = [];
+  listData: RecordDayTitleModel[] = [];
 
   constructor() {
     // this.switchDate();
@@ -19,16 +20,17 @@ export class RecordClass {
 
   /** 时间切换 */
   switchDate() {
-    const date = new Date();
-    this.currentYear = date.getFullYear();
-    this.currentMonth = date.getMonth() + 1;
+    this.currentDate = new Date();
+    this.currentMonth = this.currentDate.getMonth() + 1;
+    this.startDate = DateUtils.getStartDate('month', this.currentDate);
+    this.endDate = DateUtils.getEndDate('month', this.currentDate);
     this.getData();
   }
 
   /** 获取数据 */
   async getData() {
-    const resList = await DataSql.getInstance().queryRecordList(this.currentMonth, this.currentYear);
-    const listData: Array<RecordModel<Date> | RecordDayTitleModel> = [];
+    const resList = await DataSql.getInstance().queryRecordList(this.startDate, this.endDate);
+    const listData: RecordDayTitleModel[] = [];
     const map: Record<string, RecordDayTitleModel> = {};
     let monthInTotal = '0.00';
     let monthOutTotal = '0.00';
@@ -45,6 +47,7 @@ export class RecordClass {
           inTotal: '0.00',
           outTotal: '0.00',
           customKey: dateFlag + Date.now(),
+          children: [],
         };
         listData.push(titleItem);
       }
@@ -59,8 +62,7 @@ export class RecordClass {
         monthInTotal = (Number(monthInTotal) + Number(item.value)).toFixed(2);
       }
 
-      // 处理内容
-      listData.push(item);
+      titleItem.children!.push(item);
     })
 
     // console.log(`数量: ${listData.length}`)
