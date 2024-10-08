@@ -4,6 +4,7 @@ import { EnumRecordType, RecordTypeModel } from '../../viewmodel/types/base'
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
 import { RadioList } from '../../components/radioList/Index'
 import { JSON } from '@kit.ArkTS'
+import { DataSql } from '../../sql/dataSql'
 
 @Builder
 export function builderFn() {
@@ -18,9 +19,10 @@ struct AddRecordType {
   textInputController: TextInputController = new TextInputController();
   @Local params: RecordType = new RecordType();
 
-  commit = () => {
-    console.log(`RecordType: ${JSON.stringify(this.params)}`)
-    this.pathStack.pop()
+  commit = async () => {
+    // console.log(`RecordType: ${JSON.stringify(this.params)}`)
+    await DataSql.getInstance().insertRecordTypeItem({recordName: this.params.recordName, recordType: this.params.recordType});
+    this.pathStack.pop({result: 'addSuccess'});
   }
 
   build() {
