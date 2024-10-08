@@ -10,3 +10,10 @@
 /.clang-tidy
 **/.test
 /.appanalyzer
+dataDb.db
+dataDb.db-shm
+dataDb.db-wal
+dataDb1.db
+.preview
+oh_modules
+old
