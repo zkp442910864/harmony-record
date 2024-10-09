@@ -5,8 +5,13 @@ import { RecordModel } from '../../viewmodel/types/base';
 // @Entry
 @Component
 export struct NumberKeyboard {
-  @Require commit = () => {};
-  @Consume('params') params: RecordModel
+  @Prop value?: string;
+  boxHeight: string = '36%';
+  onChange?: (newValue: string, currentValue: string) => void;
+  commit?: () => void;
+  @BuilderParam children?: () => void;
+  @BuilderParam actionBtnExtend?: () => void;
+  // @Consume('params') params: RecordModel;
   // @State params: Partial<RecordModel> = {};
   numberArr = [
     '7', '8', '9',
@@ -17,27 +22,9 @@ export struct NumberKeyboard {
 
   build() {
     Column() {
-      Row() {
-        TextInput({text: this.params.remarks, placeholder: '请输入备注'})
-          .flexGrow(1)
-          .width(0)
-          .backgroundColor(Color.Transparent)
-          .borderRadius(0)
-          .padding(0)
-          .fontSize(12)
-          .placeholderFont({size: 12})
-          .onChange((val) => {
-            this.params.remarks = val.toString()
-          })
-
-        Text(this.params.value || '0.00')
-          // .flexGrow(1)
-          // .width(0)
+      if (this.children) {
+        this.children();
       }
-      .padding({left: 16, top: 8, right: 16})
-      .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
-
 
       Row() {
         Grid(undefined, {
@@ -79,11 +66,16 @@ export struct NumberKeyboard {
             .flexGrow(1)
             .height(0)
             .onClick(() => this.setValue('del'))
-          Button('确定')
-            .customButtonStyle()
-            .flexGrow(3)
-            .height(0)
-            .onClick(() => this.commit())
+
+          if (this.commit) {
+            Button('确定')
+              .customButtonStyle()
+              .flexGrow(3)
+              .height(0)
+              .onClick(() => this.commit?.())
+          }
+
+          this.actionBtnExtend?.();
         }
         .width('30%')
         .height('100%')
@@ -95,11 +87,11 @@ export struct NumberKeyboard {
     }
     .backgroundColor(CommonConstants.COLOR_SECONDARY)
     .width('100%')
-    .height('36%')
+    .height(this.boxHeight)
   }
 
   setValue(val: string) {
-    const oleValue = this.params.value || '';
+    const oleValue = this.value || '';
     let valArr = oleValue.split('').filter(ii => ii !== '');
 
     if (val === 'del') {
@@ -123,7 +115,8 @@ export struct NumberKeyboard {
       valArr.push(val)
     }
 
-    this.params.value = valArr.join('');
+    // this.params.value = valArr.join('');
+    this.onChange?.(valArr.join(''), val);
   }
 }
 

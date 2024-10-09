@@ -20,7 +20,7 @@ struct AddRecord {
   cacheData: CacheData = {}
   @State recordType: RecordType = new RecordType()
   @State currentRecordBg: number = 0;
-  @Provide('params') params: RecordModel<Date> = {
+  @State params: RecordModel<Date> = {
     valueType: EnumRecordType.OUT,
     value: '',
     remarks: ''
@@ -62,6 +62,13 @@ struct AddRecord {
         }
 
         NumberKeyboard({
+          children: () => {
+            this.numberKeyboardTopBox()
+          },
+          value: this.params.value,
+          onChange: (newValue) => {
+            this.params.value = newValue;
+          },
           commit: this.commit
         })
       }
@@ -169,5 +176,29 @@ struct AddRecord {
     .padding(4)
     .lanes(5)
     .opacity(this.params.valueType === type ? 1 : 0)
+  }
+
+  @Builder
+  numberKeyboardTopBox() {
+    Row() {
+      TextInput({text: this.params.remarks, placeholder: '请输入备注'})
+        .flexGrow(1)
+        .width(0)
+        .backgroundColor(Color.Transparent)
+        .borderRadius(0)
+        .padding(0)
+        .fontSize(12)
+        .placeholderFont({size: 12})
+        .onChange((val) => {
+          this.params.remarks = val.toString()
+        })
+
+      Text(this.params.value || '0.00')
+      // .flexGrow(1)
+      // .width(0)
+    }
+    .padding({left: 16, top: 8, right: 16})
+    .width('100%')
+    .justifyContent(FlexAlign.SpaceBetween)
   }
 }

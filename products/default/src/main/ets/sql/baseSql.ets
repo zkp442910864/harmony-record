@@ -56,7 +56,13 @@ class BaseSql {
     } catch (err) {
       console.error(`Sql： 表创建失败, code: ${err.code},message: ${err.message}`);
     }
+  }
 
+  /** 重新启动 */
+  async resetStart(context: Context) {
+    await this.store!.close();
+    this.store = undefined;
+    await this.init(context);
   }
 
   async test() {

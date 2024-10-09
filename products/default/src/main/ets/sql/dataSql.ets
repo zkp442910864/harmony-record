@@ -24,6 +24,10 @@ export class DataSql {
     return DataSql.dataSql;
   }
 
+  static destroyInstance() {
+    DataSql.dataSql = undefined;
+  }
+
   sqlObj = getSqlObj();
   store: relationalStore.RdbStore = this.sqlObj.rdbStore;
 
@@ -231,7 +235,7 @@ export class DataSql {
 
     try {
       const data = new relationalStore.RdbPredicates(BaseSqlSentence.WALLET_TABLE_NAME);
-      data.orderByAsc('id');
+      data.orderByDesc('id');
       data.limitAs(1);
 
       const resultSet = await this.store.query(data);
