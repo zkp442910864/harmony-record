@@ -1,7 +1,7 @@
 import { CommonConstants } from '../../constants/CommonConstants';
-import { Home } from './modules/Home';
-import { My } from './modules/My';
-import { Statistics } from './modules/Statistics';
+import { Home } from './childrenPages/Home';
+import { My } from './childrenPages/My';
+import { Statistics } from './childrenPages/Statistics';
 import { curves, promptAction } from '@kit.ArkUI';
 import { getSqlObj } from '../../sql/baseSql';
 import { requestAnimationFramePolyfill } from '@mcui/mccharts/src/main/ets/utils';
@@ -43,7 +43,7 @@ struct Index {
         .tabBar(this.tabBar(1, '统计', $r('app.media.chart')))
 
         TabContent() {
-          My()
+          My({pageShow: this.current === 2})
         }
         .tabBar(this.tabBar(2, '个人', $r('app.media.moneybag')))
 

@@ -1,17 +1,23 @@
 import { requestAnimationFramePolyfill } from '@mcui/mccharts/src/main/ets/utils'
 import { CommonConstants } from '../../../constants/CommonConstants'
 import curves from '@ohos.curves'
+import { DataSql } from '../../../sql/dataSql';
+import { getSqlObj } from '../../../sql/baseSql';
+import { ComponentContent } from '@kit.ArkUI';
+import { updatePriceDialogFn } from '../modules/UpdatePriceDialog';
 
 @Preview
 @Entry
 @Component
 export struct My {
+  @Prop @Watch('onCustomPageShow') pageShow: boolean = false;
+  @State totalPrice: string = '0.00';
   options: IOptionItem[] = [
     {label: '资产管理', value: 'setPrice'},
     {label: '分类管理', value: 'setClass'},
     {label: '安全设置', value: 'setSafety'},
     {label: '上传坚果云', value: 'uploadCloud'},
-    // {label: '设置资产', value: 'set'},
+    {label: '重启sql', value: 'resetSql'},
     // {label: '设置资产', value: 'set'},
     // {label: '设置资产', value: 'set'},
     // {label: '设置资产', value: 'set'},
@@ -28,8 +34,32 @@ export struct My {
     // {label: '设置资产1', value: 'set'},
   ];
 
-  action(value: string) {
-    console.log(value)
+  aboutToAppear(): void {
+    this.onCustomPageShow();
+  }
+
+  onCustomPageShow() {
+    if (this.pageShow) {
+      console.log('My 显示')
+      this.getData();
+    }
+  }
+
+  async getData() {
+    this.totalPrice = await DataSql.getInstance().queryLastWalletItem();
+  }
+
+  action(type: string) {
+    console.log(type)
+    if (type === 'setPrice') {
+      updatePriceDialogFn(this.getUIContext()).then(() => {
+        this.getData();
+      });
+    }
+    else if (type === 'resetSql') {
+      DataSql.destroyInstance();
+      getSqlObj().resetStart(getContext())
+    }
   }
 
   build() {
@@ -50,7 +80,7 @@ export struct My {
               .flexGrow(1)
               .width(0)
               .textAlign(TextAlign.Start)
-            Text('0.00')
+            Text(this.totalPrice)
               .flexGrow(1)
               .width(0)
               .textAlign(TextAlign.End)
