@@ -5,14 +5,41 @@ import { Statistics } from './childrenPages/Statistics';
 import { curves, promptAction } from '@kit.ArkUI';
 import { getSqlObj } from '../../sql/baseSql';
 import { requestAnimationFramePolyfill } from '@mcui/mccharts/src/main/ets/utils';
+import { NewNavPathStack } from '../../utils';
 
 @Entry
 @Component
 struct Index {
   @State current: number = 0;
-  @Provide('pageStack') pageStack: NavPathStack = new NavPathStack();
+  /** 目前显示的是否跟页面 */
+  @State isRootPage: boolean = true;
+  inPageStack: NewNavPathStack = new NewNavPathStack();
+  @Provide('pageStack') pageStack: NewNavPathStack = this.inPageStack;
 
   lastTime: number = 0;
+
+  aboutToAppear(): void {
+    // this.pageStack.pageBackMonitor(() => {
+    //   if (this.inPageStack.getAllPathName().length <= 0) {
+    //     this.isRootPage = true;
+    //   }
+    // });
+
+    this.pageStack.setInterception({
+      didShow: () => {
+        if (this.inPageStack.getAllPathName().length <= 0) {
+          this.isRootPage = true;
+        }
+        else {
+          this.isRootPage = false;
+        }
+      }
+    })
+  }
+
+  onPageShow(): void {
+    console.log('123123')
+  }
 
   onBackPress(): boolean | void {
     if (Date.now() - this.lastTime > 2000) {
@@ -29,7 +56,7 @@ struct Index {
   }
 
   build() {
-    Navigation(this.pageStack) {
+    Navigation(this.inPageStack) {
       Tabs({index: 0}) {
 
         TabContent() {
@@ -43,7 +70,7 @@ struct Index {
         .tabBar(this.tabBar(1, '统计', $r('app.media.chart')))
 
         TabContent() {
-          My({pageShow: this.current === 2})
+          My({pageShow: this.current === 2, pageStack: this.inPageStack, isRootPage: this.isRootPage})
         }
         .tabBar(this.tabBar(2, '个人', $r('app.media.moneybag')))
 

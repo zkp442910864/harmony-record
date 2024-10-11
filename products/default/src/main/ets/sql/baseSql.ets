@@ -9,7 +9,7 @@ let sqlObj: BaseSql;
 
 class BaseSql {
   store?: relationalStore.RdbStore;
-  BACKUP_NAME = 'back_dataDb.db';
+  BACKUP_NAME = 'backup_dataDb.db';
   STORE_CONFIG: relationalStore.StoreConfig = {
     name: 'dataDb.db',
     securityLevel: relationalStore.SecurityLevel.S1, // 数据库安全级别
@@ -17,6 +17,10 @@ class BaseSql {
     // customDir: 'customDir/subCustomDir', // 可选参数，数据库自定义路径。数据库将在如下的目录结构中被创建：context.databaseDir + '/rdb/' + customDir，其中context.databaseDir是应用沙箱对应的路径，'/rdb/'表示创建的是关系型数据库，customDir表示自定义的路径。当此参数不填时，默认在本应用沙箱目录下创建RdbStore实例。
     isReadOnly: false // 可选参数，指定数据库是否以只读方式打开。该参数默认为false，表示数据库可读可写。该参数为true时，只允许从数据库读取数据，不允许对数据库进行写操作，否则会返回错误码801。
   };
+
+  get BACKUP_URL() {
+    return getContext().databaseDir + '/rdb/' + this.BACKUP_NAME;
+  }
 
   /** 获取 数据库实例 */
   get rdbStore() {
@@ -174,12 +178,29 @@ class BaseSql {
 
   /** 备份 */
   backup() {
-    this.store!.backup(this.BACKUP_NAME, (err: BusinessError) => {
-      if (err) {
-        console.error(`Sql: 备份数据库失败. Code:${err.code}, message:${err.message}`);
-        return;
-      }
-      console.info('Sql: 备份数据库成功.');
+    return new Promise<string>((rel, rej) => {
+      this.store!.backup(this.BACKUP_NAME, (err: BusinessError, data) => {
+        if (err) {
+          console.error(`Sql: 备份数据库失败. Code:${err.code}, message:${err.message}`);
+          rej(err);
+          return;
+        }
+        rel(this.BACKUP_URL);
+      })
+    })
+  }
+
+  /** 恢复 */
+  restore() {
+    return new Promise<void>((rel, rej) => {
+      this.store!.restore(this.BACKUP_NAME, (err: BusinessError) => {
+        if (err) {
+          console.error(`Sql: 恢复数据库失败. Code:${err.code}, message:${err.message}`);
+          rej(err);
+          return;
+        }
+        rel();
+      })
     })
   }
 

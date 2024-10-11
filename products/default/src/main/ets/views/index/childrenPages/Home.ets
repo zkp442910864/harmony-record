@@ -12,7 +12,6 @@ export struct Home {
 
   aboutToAppear(): void {
     this.onCustomPageShow()
-    this.homeData.switchDate()
     EventBus.on('updateHomeData', this.getData)
   }
 
@@ -23,6 +22,7 @@ export struct Home {
   onCustomPageShow() {
     if (this.pageShow) {
       console.log('Home 显示')
+      this.homeData.switchDate()
     }
   }
 

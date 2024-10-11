@@ -5,41 +5,32 @@ import { DataSql } from '../../../sql/dataSql';
 import { getSqlObj } from '../../../sql/baseSql';
 import { ComponentContent } from '@kit.ArkUI';
 import { updatePriceDialogFn } from '../modules/UpdatePriceDialog';
+import { sleep } from '../../../utils';
+import { CloudBackup } from '../../../utils/cloudBackup';
 
 @Preview
 @Entry
-@Component
+@ComponentV2
 export struct My {
-  @Prop @Watch('onCustomPageShow') pageShow: boolean = false;
-  @State totalPrice: string = '0.00';
-  options: IOptionItem[] = [
-    {label: '资产管理', value: 'setPrice'},
-    {label: '分类管理', value: 'setClass'},
-    {label: '安全设置', value: 'setSafety'},
-    {label: '上传坚果云', value: 'uploadCloud'},
-    {label: '重启sql', value: 'resetSql'},
-    // {label: '设置资产', value: 'set'},
-    // {label: '设置资产', value: 'set'},
-    // {label: '设置资产', value: 'set'},
-    // {label: '设置资产', value: 'set'},
-    // {label: '设置资产10', value: 'set'},
-    // {label: '设置资产9', value: 'set'},
-    // {label: '设置资产8', value: 'set'},
-    // {label: '设置资产7', value: 'set'},
-    // {label: '设置资产6', value: 'set'},
-    // {label: '设置资产5', value: 'set'},
-    // {label: '设置资产4', value: 'set'},
-    // {label: '设置资产3', value: 'set'},
-    // {label: '设置资产2', value: 'set'},
-    // {label: '设置资产1', value: 'set'},
+  @Param @Require pageStack: NavPathStack = new NavPathStack();
+  @Param isRootPage = true;
+  @Param pageShow: boolean = false;
+  @Local totalPrice: string = '0.00';
+  @Local options: COptionItem[] = [
+    new COptionItem('资产管理', 'setPrice'),
+    // new COptionItem('分类管理', 'setClass'),
+    // new COptionItem('安全设置', 'setSafety'),
+    new COptionItem('云备份设置', 'uploadCloud'),
+    new COptionItem('重启sql', 'resetSql'),
   ];
 
   aboutToAppear(): void {
     this.onCustomPageShow();
   }
 
+  @Monitor('pageShow', 'isRootPage')
   onCustomPageShow() {
-    if (this.pageShow) {
+    if (this.pageShow && this.isRootPage) {
       console.log('My 显示')
       this.getData();
     }
@@ -49,16 +40,23 @@ export struct My {
     this.totalPrice = await DataSql.getInstance().queryLastWalletItem();
   }
 
-  action(type: string) {
+  async action(type: string, item: COptionItem, index: number) {
     console.log(type)
     if (type === 'setPrice') {
       updatePriceDialogFn(this.getUIContext()).then(() => {
         this.getData();
       });
     }
+    else if (type === 'uploadCloud') {
+      this.pageStack.pushPathByName('CloudBackupSet', '');
+    }
     else if (type === 'resetSql') {
+      if (item.loading) return;
+      item.loading = true;
       DataSql.destroyInstance();
-      getSqlObj().resetStart(getContext())
+      await getSqlObj().resetStart(getContext());
+      await sleep(1000);
+      item.loading = false;
     }
   }
 
@@ -95,18 +93,27 @@ export struct My {
 
         Stack() {
           Column() {
-            ForEach(this.options, (item: IOptionItem) => {
+            ForEach(this.options, (item: COptionItem, index) => {
               Row() {
                 Text(item.label)
                   .fontSize(12)
-                Text() {
-                  SymbolSpan($r('sys.symbol.chevron_right'))
+
+                if (item.loading) {
+                  SymbolGlyph($r('sys.symbol.rays'))
+                    .fontSize(20)
+                    .symbolEffect(new HierarchicalSymbolEffect(EffectFillStyle.ITERATIVE), true)
+                }
+                else {
+                  Text() {
+                    SymbolSpan($r('sys.symbol.chevron_right'))
+                      .fontSize(20)
+                  }
                 }
               }
               .justifyContent(FlexAlign.SpaceBetween)
               .width('100%')
               .padding({left: 16, right: 16, top: 12, bottom: 12})
-              .onClick(() => this.action(item.value))
+              .onClick(() => this.action(item.value, item, index))
 
               Divider()
                 .margin({left: 60, right: 60})
@@ -126,7 +133,16 @@ export struct My {
   }
 }
 
-interface IOptionItem {
+@ObservedV2
+class COptionItem {
   label: string;
   value: string;
+  @Trace loading?: boolean;
+
+  constructor(label: string, value: string, loading: boolean = false) {
+    this.label = label;
+    this.value = value;
+    this.loading = loading;
+  }
+
 }

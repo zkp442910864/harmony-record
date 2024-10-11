@@ -93,3 +93,31 @@ export interface StatisticsData {
   inList: Array<StatisticsItem | null>;
   outList: Array<StatisticsItem | null>;
 }
+
+/** router_map.json data类型定义 */
+export interface IRouterMapData {
+  title: string;
+}
+
+/** 解析的xml模型 */
+export interface IXmlData {
+  children?: IXmlData[];
+  name: string;
+  type: string;
+  value?: string;
+}
+
+/** xml根模型 */
+export interface IXmlRoot {
+  children: IXmlData[];
+}
+
+/** 转换的数据模型 */
+export interface ICloudListData {
+  value?: string;
+  date?: Date;
+  dateStr?: string;
+  isCollection?: boolean;
+  children?: ICloudListData[]
+}
+
