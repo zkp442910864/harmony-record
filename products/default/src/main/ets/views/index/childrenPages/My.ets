@@ -13,7 +13,7 @@ import { CloudBackup } from '../../../utils/cloudBackup';
 @ComponentV2
 export struct My {
   @Param @Require pageStack: NavPathStack = new NavPathStack();
-  @Param isRootPage = true;
+  @Param isRootPage: boolean = true;
   @Param pageShow: boolean = false;
   @Local totalPrice: string = '0.00';
   @Local options: COptionItem[] = [

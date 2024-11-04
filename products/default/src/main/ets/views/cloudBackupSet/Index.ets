@@ -16,8 +16,8 @@ export function builderFn() {
 struct CloudBackupSet {
   pathStack?: NavPathStack;
   @Local title: string = '';
-  @Local params = Store.getData(CloudParamsData, 'webDavParams', () => new CloudParamsData());
-  @Local loading = false;
+  @Local params: CloudParamsData = Store.getData(CloudParamsData, 'webDavParams', () => new CloudParamsData());
+  @Local loading: boolean = false;
   customDialogComponentId = 0;
 
   aboutToAppear(): void {
