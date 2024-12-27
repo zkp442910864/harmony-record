@@ -40,7 +40,7 @@ export class DataSql {
 
   /** 查询记录列表 */
   async queryRecordList(start: Date, end: Date) {
-    const list: RecordModel<Date>[] = [];
+    let list: RecordModel<Date>[] = [];
 
     try {
       // const data = DateUtils.getMonthRang(month, year);
@@ -52,18 +52,7 @@ export class DataSql {
         ORDER BY recordList.recordDate DESC
       `);
 
-      while (resultSet.goToNextRow()) {
-        const data: RecordModel<Date> = {
-          id: resultSet.getLong(resultSet.getColumnIndex('id')),
-          recordTypeId: resultSet.getLong(resultSet.getColumnIndex('recordTypeId')),
-          recordTypeName: resultSet.getString(resultSet.getColumnIndex('recordTypeName')),
-          valueType: resultSet.getLong(resultSet.getColumnIndex('valueType')),
-          value: resultSet.getString(resultSet.getColumnIndex('value')),
-          recordDate: DateUtils.toLocalDate(resultSet.getLong(resultSet.getColumnIndex('recordDate'))),
-          remarks: resultSet.getString(resultSet.getColumnIndex('remarks')),
-        };
-        list.push(data);
-      }
+      list = this.convertorRecordData(resultSet);
 
       resultSet.close();
     } catch (err) {
@@ -71,6 +60,41 @@ export class DataSql {
     }
 
     return list;
+  }
+
+  /** 记录数据 结构转换 */
+  private convertorRecordData(resultSet: relationalStore.ResultSet, hasRecordTypeName = true) {
+    const list: RecordModel<Date>[] = [];
+
+    while (resultSet.goToNextRow()) {
+      const data: RecordModel<Date> = {
+        id: resultSet.getLong(resultSet.getColumnIndex('id')),
+        recordTypeId: resultSet.getLong(resultSet.getColumnIndex('recordTypeId')),
+        recordTypeName: hasRecordTypeName ? resultSet.getString(resultSet.getColumnIndex('recordTypeName')) : undefined,
+        valueType: resultSet.getLong(resultSet.getColumnIndex('valueType')),
+        value: resultSet.getString(resultSet.getColumnIndex('value')),
+        recordDate: DateUtils.toLocalDate(resultSet.getLong(resultSet.getColumnIndex('recordDate'))),
+        remarks: resultSet.getString(resultSet.getColumnIndex('remarks')),
+      };
+      list.push(data);
+    }
+
+    return list;
+  }
+
+  /** 指定查询一条数据 */
+  async queryAssignRecordItem(id: number) {
+    let item: RecordModel<Date> | undefined = undefined;
+    try {
+      const data = new relationalStore.RdbPredicates(BaseSqlSentence.RECORD_LIST_TABLE_NAME);
+      data.equalTo('id', id);
+      const resultSet = await this.store.query(data);
+      item = this.convertorRecordData(resultSet, false)[0];
+      resultSet.close();
+    } catch (err) {
+      console.error(`指定查询一条数据 失败: queryStatisticsData, code: ${err.code}, message: ${err.message}`);
+    }
+    return item;
   }
 
   /** 按记录 查询 支出/收入 统计 */
@@ -136,6 +160,31 @@ export class DataSql {
         return Promise.reject(err);
       });
     this.updateWalletData(params.valueType === EnumRecordType.IN ? 'in' : 'out', params.value!);
+  }
+
+  /** 更新记录数据 */
+  async updateRecordItem(data: RecordModel<Date>) {
+    let params: RecordModel<number> = JSON.parse(JSON.stringify(data));
+    params.recordTypeName = undefined;
+    params = JSON.parse(JSON.stringify(params));
+
+    if (data.createDate) {
+      params.createDate = DateUtils.toUTCTime(data.createDate);
+    }
+
+    if (data.recordDate) {
+      params.recordDate = DateUtils.toUTCTime(data.recordDate);
+    }
+
+    await this.recoverWallet(data.id!);
+    const predicates = new relationalStore.RdbPredicates(BaseSqlSentence.RECORD_LIST_TABLE_NAME);
+    predicates.equalTo('id', data.id!);
+    await this.store.update(params as relationalStore.ValuesBucket, predicates)
+      .catch((err: BusinessError) => {
+        console.error(`更新记录数据失败: insertRecordItem, code: ${err.code}, message: ${err.message}`);
+        return Promise.reject(err);
+      })
+    await this.updateWalletData(params.valueType === EnumRecordType.IN ? 'in' : 'out', params.value!);
   }
 
   /** 查询分类列表 */
@@ -229,6 +278,17 @@ export class DataSql {
     }
   }
 
+  /** 移除一条记录后，钱包金额恢复 */
+  async recoverWallet(id: number) {
+    const oldData = await this.queryAssignRecordItem(id);
+    if (oldData) {
+      await this.updateWalletData(oldData.valueType === EnumRecordType.IN ? 'out' : 'in', oldData.value!).catch((err: BusinessError) => {
+        console.error(`移除一条记录后，钱包金额恢复 失败: queryLastWalletItem, code: ${err.code}, message: ${err.message}`);
+        return Promise.reject(err);
+      })
+    }
+  }
+
   /** 查询钱包最后一条记录 */
   async queryLastWalletItem() {
     let value = '0.00';
@@ -260,7 +320,7 @@ export class DataSql {
         value,
         createDate: DateUtils.toUTCTime(Date.now()),
       }
-      this.store.insert(BaseSqlSentence.WALLET_TABLE_NAME, data as relationalStore.ValuesBucket);
+      await this.store.insert(BaseSqlSentence.WALLET_TABLE_NAME, data as relationalStore.ValuesBucket);
     } catch (err) {
       console.error(`插入钱包记录失败: insertWalletItem, code: ${err.code}, message: ${err.message}`);
     }

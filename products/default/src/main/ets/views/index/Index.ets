@@ -5,25 +5,23 @@ import { Statistics } from './childrenPages/Statistics';
 import { curves, promptAction } from '@kit.ArkUI';
 import { getSqlObj } from '../../sql/baseSql';
 import { requestAnimationFramePolyfill } from '@mcui/mccharts/src/main/ets/utils';
-import { NewNavPathStack } from '../../utils';
+import { AnimateCallback, CustomTransition } from '../../customTransition';
+import { MyNavPathStack } from '../../routerTransition/myNavPathStack';
 
 @Entry
 @Component
 struct Index {
   @State current: number = 0;
-  /** 目前显示的是否跟页面 */
+  /** 目前显示的是否根页面 */
   @State isRootPage: boolean = true;
-  inPageStack: NewNavPathStack = new NewNavPathStack();
-  @Provide('pageStack') pageStack: NewNavPathStack = this.inPageStack;
+  inPageStack: MyNavPathStack = new MyNavPathStack();
+  @Provide('pageStack') pageStack: MyNavPathStack = this.inPageStack;
 
   lastTime: number = 0;
 
   aboutToAppear(): void {
-    // this.pageStack.pageBackMonitor(() => {
-    //   if (this.inPageStack.getAllPathName().length <= 0) {
-    //     this.isRootPage = true;
-    //   }
-    // });
+    // this.getUIContext()
+    // console.log('1');
 
     this.pageStack.setInterception({
       didShow: () => {
@@ -34,11 +32,17 @@ struct Index {
           this.isRootPage = false;
         }
       }
-    })
+    });
+    // CustomTransition.getInstance().registerNavParam(-1, () => {}, 500);
+  }
+
+  aboutToDisappear() {
+    // CustomTransition.getInstance().unRegisterNavParam(-1);
   }
 
   onPageShow(): void {
-    console.log('123123')
+    // console.log('123123')
+    // this.getUIContext().getComponentUtils().getRectangleById()
   }
 
   onBackPress(): boolean | void {
@@ -95,6 +99,38 @@ struct Index {
     .backgroundColor(CommonConstants.COLOR_SECONDARY)
     .height('100%')
     .width('100%')
+    // .customNavContentTransition((from, to, operation) => {
+    //   const pages = ['AddRecord'];
+    //   if (!from || !to) return undefined;
+    //   // if (from.index === -1 || to.index === -1) {
+    //   // }
+    //
+    //   if (!(pages.includes(from.name || '') || pages.includes(to.name || ''))) return undefined;
+    //
+    //   // let fromParam: AnimateCallback = CustomTransition.getInstance().getAnimateParam(from.index);
+    //   // let toParam: AnimateCallback = CustomTransition.getInstance().getAnimateParam(to.index);
+    //   // if (!fromParam.animation || !toParam.animation) {
+    //   //   return undefined;
+    //   // }
+    //
+    //   const customAnimation: NavigationAnimatedTransition = {
+    //     timeout: 2000,
+    //     onTransitionEnd: (isSuccess: boolean) => {
+    //       console.log(`当前转换结果为 ${isSuccess}`);
+    //     },
+    //     transition: (transitionProxy: NavigationTransitionProxy): void => {
+    //       // throw new Error('Function not implemented.');
+    //       // if (fromParam.animation) {
+    //       //   fromParam.animation(operation == NavigationOperation.PUSH, true, transitionProxy);
+    //       // }
+    //       // if (toParam.animation) {
+    //       //   toParam.animation(operation == NavigationOperation.PUSH, false, transitionProxy);
+    //       // }
+    //     }
+    //   };
+    //
+    //   return customAnimation;
+    // })
   }
 
   @Builder

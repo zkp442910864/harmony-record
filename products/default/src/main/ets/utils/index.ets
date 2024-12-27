@@ -2,7 +2,6 @@ import { promptAction } from '@kit.ArkUI';
 
 export {DateUtils} from './dateUtils';
 export {EventBus} from './eventBus';
-export * from './newNavPathStack';
 export * from './extendPromise';
 
 export const isEmpty = (val: string | number | boolean | null | undefined) => {

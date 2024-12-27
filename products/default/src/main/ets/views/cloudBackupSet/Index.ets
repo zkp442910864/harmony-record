@@ -2,9 +2,10 @@ import { CommonConstants } from '../../constants/CommonConstants';
 import { ICloudListData, IRouterMapData } from '../../viewmodel/types/base';
 import { ITilePromise, tilePromise, toast } from '../../utils';
 import { Store } from '../../store';
-import { promptAction } from '@kit.ArkUI';
+import { promptAction, SymbolGlyphModifier } from '@kit.ArkUI';
 import { CloudBackup } from '../../utils/cloudBackup';
 import { CloudParamsData } from '../../viewmodel/cloudData';
+import { ITransitionParam, MyNavDestinationAnimationModifier } from '../../routerTransition/index'
 
 @Builder
 export function builderFn() {
@@ -19,6 +20,16 @@ struct CloudBackupSet {
   @Local params: CloudParamsData = Store.getData(CloudParamsData, 'webDavParams', () => new CloudParamsData());
   @Local loading: boolean = false;
   customDialogComponentId = 0;
+  @Local myNavDestinationAnimationModifier: MyNavDestinationAnimationModifier = new MyNavDestinationAnimationModifier(
+    this,
+    async (context) => {
+      const routerConfig = context.getConfigInRouteMap();
+      const data = routerConfig!.data as IRouterMapData;
+
+      this.pathStack = context.pathStack;
+      this.title = data.title;
+    }
+  );
 
   aboutToAppear(): void {
     this.queryNavDestinationInfo()
@@ -196,13 +207,18 @@ struct CloudBackupSet {
     }
     .title(this.title)
     .backgroundColor(CommonConstants.COLOR_SECONDARY)
+    .menus([
+      {
+        value: '保存',
+        symbolIcon: new SymbolGlyphModifier($r('sys.symbol.save'))
+          .fontSize(20)
+          .fontColor([CommonConstants.COLOR_MAIN]),
+        action: this.saveWebDavData,
+      }
+    ])
+    .attributeModifier(this.myNavDestinationAnimationModifier)
     .onReady((context) => {
-      const routerConfig = context.getConfigInRouteMap();
-      const data = routerConfig!.data as IRouterMapData;
-
-      this.pathStack = context.pathStack;
-      this.title = data.title;
-
+      this.myNavDestinationAnimationModifier.ready(context);
     })
   }
 

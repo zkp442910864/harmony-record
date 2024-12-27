@@ -5,6 +5,7 @@ import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
 import { RadioList } from '../../components/radioList/Index'
 import { JSON } from '@kit.ArkTS'
 import { DataSql } from '../../sql/dataSql'
+import { ITransitionParam, MyNavDestinationAnimationModifier } from '../../routerTransition/index'
 
 @Builder
 export function builderFn() {
@@ -18,6 +19,12 @@ struct AddRecordType {
   pathStack: NavPathStack = new NavPathStack()
   textInputController: TextInputController = new TextInputController();
   @Local params: RecordType = new RecordType();
+  @Local myNavDestinationAnimationModifier: MyNavDestinationAnimationModifier = new MyNavDestinationAnimationModifier(
+    this,
+    (context) => {
+      this.pathStack = context.pathStack;
+    }
+  );
 
   commit = async () => {
     // console.log(`RecordType: ${JSON.stringify(this.params)}`)
@@ -78,8 +85,9 @@ struct AddRecordType {
       }
     ])
     .backgroundColor(CommonConstants.COLOR_SECONDARY)
+    .attributeModifier(this.myNavDestinationAnimationModifier)
     .onReady((context) => {
-      this.pathStack = context.pathStack;
+      this.myNavDestinationAnimationModifier.ready(context);
     })
   }
 

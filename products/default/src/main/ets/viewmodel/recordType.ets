@@ -1,9 +1,10 @@
 import { DataSql } from '../sql/dataSql';
 import { EnumRecordType, RecordTypeModel } from './types/base';
 
+@ObservedV2
 export class RecordType {
-  inTypeArr: RecordTypeModel[] = [];
-  outTypeArr: RecordTypeModel[] = [];
+  @Trace inTypeArr: RecordTypeModel[] = [];
+  @Trace outTypeArr: RecordTypeModel[] = [];
 
   constructor() {}
 

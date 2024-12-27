@@ -2,8 +2,9 @@ import { CommonConstants } from '../../../constants/CommonConstants'
 import { McBarChart, Options } from '@mcui/mccharts'
 import { DataSql } from '../../../sql/dataSql';
 import { DateUtils } from '../../../utils';
-import { EnumRecordType, RecordTypeStatisticsModel } from '../../../viewmodel/types/base';
+import { EnumRecordType, RecordModel, RecordTypeStatisticsModel } from '../../../viewmodel/types/base';
 import { curves } from '@kit.ArkUI';
+import { ITransitionParam } from '../../../routerTransition';
 
 // @Entry
 // @Preview
@@ -93,12 +94,19 @@ export struct Statistics {
     this.statisticsList = list;
   }
 
-  linkAdd() {
-    this.pageStack?.pushPathByName('AddRecordType', '', (popInfo) => {
+  linkAdd(e: ClickEvent) {
+    const data: ITransitionParam<RecordModel<Date>> = {
+      x: e.windowX - e.x,
+      y: e.windowY - e.y,
+      targetWidth: e.target.area.width,
+      targetHeight: e.target.area.height,
+      // data: item,
+    };
+    this.pageStack?.pushPathByName('AddRecordType', data, (popInfo) => {
       if (popInfo.result === 'addSuccess') {
         this.getRecordTypeStatisticsData();
       }
-    });
+    }, false);
   }
 
   build() {
@@ -166,7 +174,7 @@ export struct Statistics {
             .height(50)
             .shadow(CommonConstants.BOX_SHADOW)
             .position({right: 10, bottom: 30})
-            .onClick(() => this.linkAdd())
+            .onClick((e) => this.linkAdd(e))
         }
       }
       .flexGrow(1)

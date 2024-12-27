@@ -1,11 +1,12 @@
 import { CommonConstants } from '../../constants/CommonConstants'
 import { EnumRecordType, RecordModel, RecordTypeModel } from '../../viewmodel/types/base'
-import { CacheData, RecordType } from '../../viewmodel/recordType'
-import { curves } from '@kit.ArkUI'
+import { RecordType } from '../../viewmodel/recordType'
+import { BuilderNode, curves, NodeController, SymbolGlyphModifier } from '@kit.ArkUI'
 import { NumberKeyboard } from '../../components/numberKeyboard/Index'
 import { JSON } from '@kit.ArkTS'
 import { DataSql } from '../../sql/dataSql'
 import { EventBus, isEmpty, toast } from '../../utils'
+import { ITransitionParam, MyNavDestinationAnimationModifier } from '../../routerTransition/index'
 
 @Builder
 export function builderFn() {
@@ -14,21 +15,25 @@ export function builderFn() {
 
 @Preview
 @Entry
-@Component
+@ComponentV2
 struct AddRecord {
   pathStack: NavPathStack = new NavPathStack()
-  cacheData: CacheData = {}
-  @State recordType: RecordType = new RecordType()
-  @State currentRecordBg: number = 0;
-  @State params: RecordModel<Date> = {
-    valueType: EnumRecordType.OUT,
-    value: '',
-    remarks: ''
-  };
+  @Local cacheData: CacheData = new CacheData()
+  @Local myNavDestinationAnimationModifier: MyNavDestinationAnimationModifier = new MyNavDestinationAnimationModifier(
+    this,
+    async (context) => {
+      this.pathStack = context.pathStack;
+      const param = context.pathInfo.param as ITransitionParam<RecordModel<Date>>;
 
-  aboutToAppear(): void {
-    this.initData();
-  }
+      await this.initData();
+      if (param.data) this.handleEditData(param.data);
+    }
+  );
+  @Local recordType: RecordType = new RecordType()
+  @Local currentRecordBg: number = 0;
+  @Local params: Cparams = new Cparams();
+
+  aboutToAppear(): void {}
 
   initData = async () => {
     await this.recordType.getRecordTypeDataDb();
@@ -38,17 +43,50 @@ struct AddRecord {
     this.params.recordTypeId = this.cacheData.outRecordTypeId;
   }
 
+  handleEditData = (item: RecordModel<Date>) => {
+    this.toggleTopType(item.valueType!);
+    this.toggleType(item.valueType!, {id: item.recordTypeId});
+    // this.params = JSON.parse(JSON.stringify(item)) as RecordModel<Date>;
+    this.params = new Cparams(item.valueType, item.value, item.remarks, item.recordTypeId, item.id, item.recordDate);
+  }
+
+  /** 切换顶部菜单类型 */
+  toggleTopType = (type: EnumRecordType) => {
+    this.getUIContext()?.animateTo({ curve: curves.springMotion() }, () => {
+      this.params.valueType = type;
+      this.params.recordTypeId =
+        EnumRecordType.IN === type ? this.cacheData.inRecordTypeId : this.cacheData.outRecordTypeId;
+      this.currentRecordBg = EnumRecordType.IN === type ? 80 : 0;
+    })
+  }
+
+  /** 切换类型 */
+  toggleType = (type: EnumRecordType, item: RecordTypeModel) => {
+    if (type === EnumRecordType.OUT) {
+      this.cacheData.outRecordTypeId = item.id;
+    } else {
+      this.cacheData.inRecordTypeId = item.id;
+    }
+
+    this.params.recordTypeId = item.id;
+  }
+
   commit = async () => {
     if (isEmpty(this.params.value)) {
       toast('请输入金额');
       return;
     }
-    if (isEmpty(this.params.id)) {
+    if (this.params.id) {
+      await DataSql.getInstance().updateRecordItem(this.params.toCopyData());
+    }
+    else {
       this.params.recordDate = new Date();
+      await DataSql.getInstance().insertRecordItem(this.params.toCopyData());
     }
 
-    await DataSql.getInstance().insertRecordItem(this.params);
-    this.pathStack.pop();
+    setTimeout(() => {
+      this.pathStack.pop();
+    })
     EventBus.emit('updateHomeData')
   }
 
@@ -79,11 +117,18 @@ struct AddRecord {
     }
     .title(this.navTitle)
     .backgroundColor(CommonConstants.COLOR_SECONDARY)
+    .menus([
+      {
+        value: '保存',
+        symbolIcon: new SymbolGlyphModifier($r('sys.symbol.save'))
+          .fontSize(20)
+          .fontColor([CommonConstants.COLOR_MAIN]),
+        action: this.commit,
+      }
+    ])
+    .attributeModifier(this.myNavDestinationAnimationModifier)
     .onReady((context) => {
-      this.pathStack = context.pathStack;
-    })
-    .onAppear(() => {
-      // this.pathStack.getParent()
+      this.myNavDestinationAnimationModifier.ready(context);
     })
   }
 
@@ -133,12 +178,7 @@ struct AddRecord {
       .textAlign(TextAlign.Center)
       .fontColor(this.params.valueType === type ? CommonConstants.COLOR_MAIN : '#333')
       .onClick(() => {
-        this.getUIContext()?.animateTo({ curve: curves.springMotion() }, () => {
-          this.params.valueType = type;
-          this.params.recordTypeId =
-            EnumRecordType.IN === type ? this.cacheData.inRecordTypeId : this.cacheData.outRecordTypeId;
-          this.currentRecordBg = EnumRecordType.IN === type ? 80 : 0;
-        })
+        this.toggleTopType(type);
       })
   }
 
@@ -160,13 +200,7 @@ struct AddRecord {
               .backgroundColor(this.params.recordTypeId === item.id ? CommonConstants.COLOR_MAIN :
               CommonConstants.COLOR_SECONDARY)
               .onClick(() => {
-                if (type === EnumRecordType.OUT) {
-                  this.cacheData.outRecordTypeId = item.id;
-                } else {
-                  this.cacheData.inRecordTypeId = item.id;
-                }
-
-                this.params.recordTypeId = item.id;
+                this.toggleType(type, item)
               })
           }
           .padding(4)
@@ -201,4 +235,45 @@ struct AddRecord {
     .width('100%')
     .justifyContent(FlexAlign.SpaceBetween)
   }
+
+}
+
+@ObservedV2
+class Cparams implements RecordModel<Date> {
+  @Trace valueType = EnumRecordType.OUT;
+  @Trace value = '';
+  @Trace remarks = '';
+  @Trace recordTypeId: number | undefined;
+  id: number | undefined;
+  @Trace recordDate: Date | undefined;
+
+  constructor(valueType?: EnumRecordType, value?: string, remarks?: string, recordTypeId?: number, id?: number, recordDate?: Date) {
+    if (id) {
+      this.valueType = valueType!
+      this.value = value!
+      this.remarks = remarks!
+      this.recordTypeId = recordTypeId!
+      this.id = id!
+      this.recordDate = recordDate!
+    }
+  }
+
+  toCopyData() {
+    const data: RecordModel<Date> = {
+      valueType: this.valueType,
+      value: this.value,
+      remarks: this.remarks,
+      recordTypeId: this.recordTypeId,
+      id: this.id,
+      recordDate: this.recordDate,
+    };
+
+    return data;
+  }
+}
+
+@ObservedV2
+class CacheData {
+  @Trace outRecordTypeId?: number;
+  @Trace inRecordTypeId?: number
 }

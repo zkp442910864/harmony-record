@@ -7,6 +7,8 @@ import { ComponentContent } from '@kit.ArkUI';
 import { updatePriceDialogFn } from '../modules/UpdatePriceDialog';
 import { sleep } from '../../../utils';
 import { CloudBackup } from '../../../utils/cloudBackup';
+import { ITransitionParam } from '../../../routerTransition';
+import { RecordModel } from '../../../viewmodel/types/base';
 
 @Preview
 @Entry
@@ -40,15 +42,22 @@ export struct My {
     this.totalPrice = await DataSql.getInstance().queryLastWalletItem();
   }
 
-  async action(type: string, item: COptionItem, index: number) {
-    console.log(type)
+  async action(e: ClickEvent, type: string, item: COptionItem, index: number) {
+    // console.log(type)
     if (type === 'setPrice') {
       updatePriceDialogFn(this.getUIContext()).then(() => {
         this.getData();
       });
     }
     else if (type === 'uploadCloud') {
-      this.pageStack.pushPathByName('CloudBackupSet', '');
+      const data: ITransitionParam<RecordModel<Date>> = {
+        x: e.windowX - e.x,
+        y: e.windowY - e.y,
+        targetWidth: e.target.area.width,
+        targetHeight: e.target.area.height,
+        // data: item,
+      };
+      this.pageStack.pushPathByName('CloudBackupSet', data, false);
     }
     else if (type === 'resetSql') {
       if (item.loading) return;
@@ -113,7 +122,7 @@ export struct My {
               .justifyContent(FlexAlign.SpaceBetween)
               .width('100%')
               .padding({left: 16, right: 16, top: 12, bottom: 12})
-              .onClick(() => this.action(item.value, item, index))
+              .onClick((e) => this.action(e, item.value, item, index))
 
               Divider()
                 .margin({left: 60, right: 60})

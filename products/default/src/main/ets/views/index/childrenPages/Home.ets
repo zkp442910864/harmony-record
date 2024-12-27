@@ -3,6 +3,7 @@ import { RecordClass } from '../../../viewmodel/record';
 import { RecordModel, RecordDayTitleModel, EnumRecordType } from '../../../viewmodel/types/base';
 import { uiObserver } from '@kit.ArkUI';
 import { DateUtils, EventBus } from '../../../utils';
+import { ITransitionParam } from '../../../routerTransition/index';
 
 @Component
 export struct Home {
@@ -26,9 +27,27 @@ export struct Home {
     }
   }
 
-  /** 添加记录 */
-  linkAdd() {
-    this.pageStack?.pushPathByName('AddRecord', '');
+  /** 操作记录页面 */
+  linkRecordPage(e: ClickEvent, type: 'add' | 'edit', item?: RecordModel<Date>) {
+    // e.target.area.width
+    // e.target.area.height
+    // e.windowX - e.x
+    // e.windowY - e.y
+    // e.x
+    // e.y
+    const data: ITransitionParam<RecordModel<Date>> = {
+      x: e.windowX - e.x,
+      y: e.windowY - e.y,
+      targetWidth: e.target.area.width,
+      targetHeight: e.target.area.height,
+      data: item,
+    };
+    if (type === 'add') {
+      this.pageStack!.pushPathByName('AddRecord', data, false);
+    }
+    else {
+      this.pageStack!.pushPathByName('AddRecord', data, false);
+    }
   }
 
   getData = (): Promise<void> => this.homeData.getData()
@@ -100,7 +119,9 @@ export struct Home {
       .height(50)
       .shadow(CommonConstants.BOX_SHADOW)
       .position({ right: 10, bottom: 30 })
-      .onClick(() => this.linkAdd())
+      .onClick((e) => {
+        this.linkRecordPage(e, 'add');
+      })
     }
     .height('100%')
     .width('100%')
@@ -159,6 +180,7 @@ export struct Home {
       }
     }
     .width('100%')
+    .onClick((e) => this.linkRecordPage(e, 'edit', item))
   }
 
   @Builder
